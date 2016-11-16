@@ -2,12 +2,10 @@
 module PromissoryNote.Redeem where
 
 import           PromissoryNote.Note
-import           Types
-import           Util.Crypto
+import           PromissoryNote.Types
 import           GHC.Generics
 import qualified Data.Serialize as Bin
 import           Data.Aeson (FromJSON, ToJSON)
-
 
 
 data RedeemBlock = RedeemBlock

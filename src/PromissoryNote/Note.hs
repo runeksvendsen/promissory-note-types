@@ -1,9 +1,7 @@
 {-# LANGUAGE DeriveGeneric, DeriveAnyClass, RecordWildCards #-}
 module PromissoryNote.Note where
 
-import           Types
-import           Util.Crypto
-import           ClearingServer.Lib.Types.Data
+import           PromissoryNote.Types
 import           GHC.Generics
 import qualified Data.Serialize as Bin
 import           Data.Aeson (FromJSON, ToJSON)
@@ -15,7 +13,7 @@ data BaseNote = BaseNote
   , face_value          :: Amount
   , issue_date          :: UTCTime
   , exp_date            :: UTCTime
-  , issuer_name         :: Identity
+  , issuer_name         :: StringIdentifier
   , issuer              :: UUID
   , verifiers           :: UUID
   } deriving (Generic, ToJSON, FromJSON, Bin.Serialize)
@@ -34,4 +32,4 @@ data NegotiationRec = NegRec
 
 
 instance HasUUID PromissoryNote where
-    serializeForId Note{..} = Bin.encode base_note
+    serializeForID PromissoryNote{..} = Bin.encode base_note
