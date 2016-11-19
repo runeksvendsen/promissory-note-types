@@ -10,7 +10,7 @@ import           Data.Aeson (FromJSON, ToJSON)
 
 data StoredNote = StoredNote
     { promissory_note   :: PromissoryNote
-    , channel_source    :: PubKey
+    , channel_source    :: SendPubKey
     , server_sig        :: Signature
     } deriving (Generic, ToJSON, FromJSON, Bin.Serialize)
 

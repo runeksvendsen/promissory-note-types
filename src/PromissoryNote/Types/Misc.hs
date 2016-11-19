@@ -3,6 +3,7 @@ module PromissoryNote.Types.Misc
 (
     module PromissoryNote.Types.Misc
 ,   UTCTime
+,   Pay.SendPubKey
 )
 where
 
@@ -11,6 +12,7 @@ import Data.Time (UTCTime)
 import qualified Data.Text as T
 import qualified Network.Haskoin.Crypto as HC
 import qualified Data.Serialize as Bin
+import qualified Data.Bitcoin.PaymentChannel as Pay
 
 
 type PubKey = HC.PubKey

@@ -3,6 +3,19 @@ resolver: lts-7.9
 
 packages:
 - '.'
+- location:
+    git: https://github.com/runeksvendsen/haskoin.git
+    commit: cbc4031f2337f1d7714f55fdd951b9942f8da130
+  extra-dep: true
+  subdirs:
+    - haskoin-core
+    - haskoin-node
+    - haskoin-wallet
+- location:
+    git: https://github.com/runeksvendsen/bitcoin-payment-channel.git
+    commit: e4c87b97fb8401ae4a8805472ff47f3e3675340a
+  extra-dep: true
+
 # Dependency packages to be pulled from upstream that are not in the resolver
 # (e.g., acme-missiles-0.3)
 extra-deps: []
