@@ -8,6 +8,7 @@ import qualified Data.Serialize as Bin
 import           Data.Aeson (FromJSON, ToJSON)
 
 
+
 data RedeemBlock = RedeemBlock
   { notes           :: [PromissoryNote]
   , pay_to_addr     :: BitcoinAddress

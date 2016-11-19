@@ -24,6 +24,7 @@ library
                      , cryptohash-sha256
                      , time
                      , haskoin-core
+--                     , bitcoin-payment-channel
                      , bytestring
                      , base16-bytestring
                      , text
