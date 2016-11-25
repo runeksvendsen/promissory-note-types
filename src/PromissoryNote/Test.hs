@@ -9,6 +9,11 @@ import           Data.ByteString.Arbitrary (slowRandBs)
 import qualified Data.Serialize as Bin
 
 
+arbNoteOfValue :: Amount -> Gen PromissoryNote
+arbNoteOfValue a = arbitrary >>=
+    \note@(PromissoryNote bn _) ->
+        return $ note { base_note = bn { face_value = a } }
+
 instance Arbitrary BaseNote where
     arbitrary = BaseNote ()
         <$> arbAmount
