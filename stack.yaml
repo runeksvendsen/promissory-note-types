@@ -15,6 +15,10 @@ packages:
     git: https://github.com/runeksvendsen/bitcoin-payment-channel.git
     commit: e4c87b97fb8401ae4a8805472ff47f3e3675340a
   extra-dep: true
+- location:
+    git: https://github.com/tsuraan/bytestring-arbitrary.git
+    commit: ce6234d7204d8f1faa3a7c05f4802ead210245ce
+  extra-dep: true
 
 # Dependency packages to be pulled from upstream that are not in the resolver
 # (e.g., acme-missiles-0.3)

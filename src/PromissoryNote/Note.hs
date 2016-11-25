@@ -1,5 +1,10 @@
 {-# LANGUAGE DeriveGeneric, DeriveAnyClass, RecordWildCards #-}
-module PromissoryNote.Note where
+module PromissoryNote.Note
+(
+  module PromissoryNote.Note
+, module PromissoryNote.Types
+)
+where
 
 import           PromissoryNote.Types
 import           GHC.Generics
