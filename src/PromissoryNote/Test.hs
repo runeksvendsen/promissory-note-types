@@ -15,7 +15,7 @@ arbNoteOfValue a t = arbitrary >>=
         return $ note { base_note = bn { face_value = a, issue_date = t } }
 
 instance Arbitrary BaseNote where
-    arbitrary = BaseNote ()
+    arbitrary = BaseNote BTC
         <$> arbAmount
         <*> arbitrary   -- issue_date
         <*> arbitrary   -- exp_date

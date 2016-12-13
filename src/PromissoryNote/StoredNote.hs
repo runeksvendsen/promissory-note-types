@@ -3,6 +3,8 @@ module PromissoryNote.StoredNote where
 
 import PromissoryNote.Types
 import PromissoryNote.Note
+import qualified Data.Bitcoin.PaymentChannel as Pay
+
 import           GHC.Generics
 import qualified Data.Serialize as Bin
 import           Data.Aeson (FromJSON, ToJSON)
@@ -11,16 +13,32 @@ import           Data.Aeson (FromJSON, ToJSON)
 data StoredNote = StoredNote
     { promissory_note       :: PromissoryNote   -- ^ The actual note
     , previous_note_id      :: UUID             -- ^ ID of the note issued before this one
-    , payment_change_val    :: BitcoinAmount    -- ^ Client change value (in payment tx) for payment against which this note is issued
-    , server_sig            :: Signature        -- ^ Signature over above data (not including 'most_recent_note')
-    , most_recent_note      :: Bool             -- ^ Is this the newest note?
+    , payment_source        :: Pay.Payment      -- ^ Client signature & change value (in payment tx), for payment against which this note is issued
+    , most_recent_note      :: Bool             -- ^ Is this the newest note (chain tip)?
     } deriving (Show, Generic, ToJSON, FromJSON, Bin.Serialize)
 
 instance HasUUID StoredNote where
     serializeForID StoredNote{..} = serializeForID promissory_note
 
-mkStoredNote :: PromissoryNote -> UUID -> BitcoinAmount -> StoredNote
-mkStoredNote pn prev_id chgVal = StoredNote pn prev_id chgVal () True
+mkGenesisNote :: PromissoryNote -> Pay.Payment -> StoredNote
+mkGenesisNote pn p = StoredNote pn zeroUUID p True
+
+-- | Create note for storage given previous note,
+-- also double check note/previous+current payment value
+mkCheckStoredNote :: PromissoryNote -> StoredNote -> Pay.Payment -> Either String StoredNote
+mkCheckStoredNote newPN prevSN@(StoredNote storedPN storedID storedPmnt _) newPmnt =
+    checkPaymentValue >>=
+        \pn -> Right $ StoredNote pn (getID prevSN) newPmnt True
+  where
+    checkPaymentValue =
+        if face_value (base_note newPN) == storedPmnt `diff` newPmnt then
+            Right newPN
+        else
+            Left $ "BUG: mkCheckStoredNote: Value mismatch.\n" ++
+                show (face_value (base_note newPN) , storedPmnt `diff` newPmnt, newPN, prevSN, newPmnt)
+
+diff :: Pay.Payment -> Pay.Payment -> BitcoinAmount
+diff p1 p2 = Pay.payClientChange p1 - Pay.payClientChange p2
 
 setMostRecentNote :: Bool -> StoredNote -> StoredNote
 setMostRecentNote b n = n { most_recent_note = b }

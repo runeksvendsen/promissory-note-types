@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveGeneric, DeriveAnyClass, RecordWildCards #-}
+{-# LANGUAGE OverloadedStrings, DeriveGeneric, DeriveAnyClass, RecordWildCards #-}
 module PromissoryNote.Note
 (
   module PromissoryNote.Note
@@ -10,6 +10,7 @@ import           PromissoryNote.Types
 import           GHC.Generics
 import qualified Data.Serialize as Bin
 import           Data.Aeson (FromJSON, ToJSON)
+import           Data.Time.Clock.POSIX  (posixSecondsToUTCTime)
 {-# ANN module ("HLint: ignore Use camelCase"::String) #-}
 
 
@@ -38,3 +39,7 @@ data NegotiationRec = NegRec
 
 instance HasUUID PromissoryNote where
     serializeForID PromissoryNote{..} = Bin.encode base_note
+
+dummyNote = PromissoryNote dummyBaseNote []
+dummyBaseNote = BaseNote BTC 0 epoch epoch "null" zeroUUID zeroUUID
+    where epoch = posixSecondsToUTCTime 0

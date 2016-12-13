@@ -1,4 +1,4 @@
-{-# LANGUAGE TypeSynonymInstances #-}
+{-# LANGUAGE TypeSynonymInstances, DeriveAnyClass, DeriveGeneric #-}
 module PromissoryNote.Types.Misc
 (
     module PromissoryNote.Types.Misc
@@ -20,7 +20,8 @@ import qualified Data.Serialize         as Bin
 import qualified Data.Serialize.Put     as BinPut
 import qualified Data.Serialize.Get     as BinGet
 import qualified Data.Bitcoin.PaymentChannel as Pay
-
+import           Data.Aeson (FromJSON, ToJSON)
+import           GHC.Generics
 
 
 type PubKey = HC.PubKey
@@ -28,7 +29,9 @@ type BitcoinAddress = HC.Address
 type Amount = Pay.BitcoinAmount
 
 type StringIdentifier = T.Text
-type Currency = ()
+
+data Currency = BTC
+    deriving (Show, Generic, ToJSON, FromJSON, Bin.Serialize)
 
 instance Bin.Serialize StringIdentifier where
     put txt = Bin.put (encodeUtf8 txt :: BS.ByteString)
