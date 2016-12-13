@@ -4,6 +4,7 @@ module PromissoryNote.Types.Misc
     module PromissoryNote.Types.Misc
 ,   UTCTime
 ,   Pay.SendPubKey
+,   Pay.BitcoinAmount
 )
 where
 

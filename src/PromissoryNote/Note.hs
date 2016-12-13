@@ -21,19 +21,19 @@ data BaseNote = BaseNote
   , issuer_name         :: StringIdentifier
   , issuer              :: UUID
   , verifiers           :: UUID
-  } deriving (Generic, ToJSON, FromJSON, Bin.Serialize)
+  } deriving (Show, Generic, ToJSON, FromJSON, Bin.Serialize)
 
 data PromissoryNote = PromissoryNote
   { base_note           :: BaseNote
   , negotiation_records :: [NegotiationRec]
-  } deriving (Generic, ToJSON, FromJSON, Bin.Serialize)
+  } deriving (Show, Generic, ToJSON, FromJSON, Bin.Serialize)
 
 data NegotiationRec = NegRec
   { bearer              :: UUID
   , payment_info        :: UUID
   -- | In case of the first negotiation record the previous bearer is the issuer
   , prev_bearer_sig     :: Signature
-  } deriving (Generic, ToJSON, FromJSON, Bin.Serialize)
+  } deriving (Show, Generic, ToJSON, FromJSON, Bin.Serialize)
 
 
 instance HasUUID PromissoryNote where
