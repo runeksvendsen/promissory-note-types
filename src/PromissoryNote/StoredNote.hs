@@ -19,5 +19,9 @@ data StoredNote = StoredNote
 instance HasUUID StoredNote where
     serializeForID StoredNote{..} = serializeForID promissory_note
 
+mkStoredNote :: PromissoryNote -> UUID -> BitcoinAmount -> StoredNote
+mkStoredNote pn prev_id chgVal = StoredNote pn prev_id chgVal () True
 
+setMostRecentNote :: Bool -> StoredNote -> StoredNote
+setMostRecentNote b n = n { most_recent_note = b }
 
