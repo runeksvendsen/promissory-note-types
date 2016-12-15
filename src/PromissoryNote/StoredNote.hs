@@ -1,5 +1,11 @@
 {-# LANGUAGE DeriveGeneric, DeriveAnyClass, RecordWildCards #-}
-module PromissoryNote.StoredNote where
+module PromissoryNote.StoredNote
+(
+  StoredNote
+, mkGenesisNote, mkCheckStoredNote
+, setMostRecentNote
+)
+where
 
 import PromissoryNote.Types
 import PromissoryNote.Note
@@ -35,7 +41,11 @@ mkCheckStoredNote newPN prevSN@(StoredNote storedPN storedID storedPmnt _) newPm
             Right newPN
         else
             Left $ "BUG: mkCheckStoredNote: Value mismatch.\n" ++
-                show (face_value (base_note newPN) , storedPmnt `diff` newPmnt, newPN, prevSN, newPmnt)
+                unlines [ show $ face_value (base_note newPN)
+                        , show $ storedPmnt `diff` newPmnt
+                        , show newPN
+                        , show prevSN
+                        , show newPmnt]
 
 diff :: Pay.Payment -> Pay.Payment -> BitcoinAmount
 diff p1 p2 = Pay.payClientChange p1 - Pay.payClientChange p2
