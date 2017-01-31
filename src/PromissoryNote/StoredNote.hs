@@ -34,7 +34,7 @@ mkGenesisNote pn p = StoredNote pn zeroUUID p True
 mkCheckStoredNote :: PromissoryNote -> StoredNote -> Pay.Payment -> Either String StoredNote
 mkCheckStoredNote newPN prevSN@(StoredNote storedPN storedID storedPmnt _) newPmnt =
     checkPaymentValue >>=
-        \pn -> Right $ StoredNote pn (getID prevSN) newPmnt True
+        \pn -> Right $ StoredNote pn (getUUID prevSN) newPmnt True
   where
     checkPaymentValue =
         if face_value (base_note newPN) == storedPmnt `diff` newPmnt then

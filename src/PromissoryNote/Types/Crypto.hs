@@ -4,11 +4,12 @@ module PromissoryNote.Types.Crypto
 , PublicKey
 , SignatureG(..)
 , dummySig
+, edPubKeyDerive
 )
 where
 
 import qualified Crypto.Sign.Ed25519 as Ed
-
+import           PromissoryNote.Types.UUID
 import           Data.Aeson (Value(String), FromJSON(..), ToJSON(..), encode, decode, withText)
 import           Data.String.Conversions (cs)
 import           Data.Hashable
@@ -54,6 +55,8 @@ instance (HasMarkerByte sig, Bin.Serialize sig) => ToJSON (SignatureG sig) where
 instance (HasMarkerByte sig, Bin.Serialize sig) => FromJSON (SignatureG sig) where
     parseJSON = withText "Signature" $ either fail return . hexDecode . cs
 
+instance (HasMarkerByte pk, Bin.Serialize pk) => HasUUID (PublicKeyG pk) where
+    serializeForID = Bin.encode
 
 
 
@@ -79,6 +82,8 @@ dummySig = MkSignatureG (Ed.Signature BS.empty)
 type Signature = SignatureG Ed.Signature
 type PublicKey = PublicKeyG Ed.PublicKey
 
+edPubKeyDerive :: Ed.SecretKey -> PublicKey
+edPubKeyDerive = MkPublicKeyG . Ed.toPublicKey
 
 instance Bin.Serialize Ed.Signature where
     put = Bin.putByteString . Ed.unSignature

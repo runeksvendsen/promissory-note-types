@@ -33,10 +33,11 @@ dependencies:
 - ed25519
 - tagged
 - mtl
+- monad-time
 
 library:
   source-dirs: src
-#  ghc-options: -Wall
+  ghc-options: -Wall
   exposed-modules:
   - PromissoryNote
   - PromissoryNote.Note

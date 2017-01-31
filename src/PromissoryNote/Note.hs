@@ -35,7 +35,7 @@ data BaseNote = BaseNote
   , exp_date            :: UTCTime          -- ^ Nanoseconds since epoch (big-endian uint64)
   , issuer_name         :: StringIdentifier -- ^ Length-prefixed (uint8) UTF-8 string (max string byte size: 255 bytes)
   , issuer              :: UUID             -- ^ Ed25519 public key hash (SHA-256)
-  , verifiers           :: UUID             -- ^ Merkle root hash of verifiers list
+  , verifiers           :: UUID             -- ^ Root node hash in Merkle tree of verifier pubkey UUIDs
   } deriving (Show, Generic, ToJSON, FromJSON, Bin.Serialize)
 
 -- | Negotiation record

@@ -22,12 +22,12 @@ data UUID = SHA256 BS.ByteString deriving Eq
 
 zeroUUID :: UUID
 zeroUUID = fromJust . decode . encode $
-    (String "0000000000000000000000000000000000000000000000000000000000000000")
+    String "0000000000000000000000000000000000000000000000000000000000000000"
 
 class HasUUID a where
     serializeForID :: a -> BS.ByteString
-    getID :: a -> UUID
-    getID = SHA256 . SHA256.hash . serializeForID
+    getUUID :: a -> UUID
+    getUUID = SHA256 . SHA256.hash . serializeForID
 
 
 instance Show UUID where
