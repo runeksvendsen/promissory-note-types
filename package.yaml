@@ -1,0 +1,61 @@
+name: promissory-note-types
+version: '0.1.0.0'
+synopsis: Initial project template from stack
+description: Please see README.md
+category: Finance Network Bitcoin
+author: Rune K. Svendsen
+maintainer: runesvend@gmail.com
+copyright: 2016 Rune K. Svendsen
+license: BSD3
+github: runeksvendsen/promissory-note-types
+
+default-extensions:
+- FlexibleInstances
+- RecordWildCards
+- MultiParamTypeClasses
+
+dependencies:
+- base >=4.7 && <5
+- cereal
+- aeson
+- hashable
+- cryptohash-sha256
+- time
+- haskoin-core
+- bitcoin-payment-channel
+- bytestring
+- base16-bytestring
+- text
+- string-conversions
+- QuickCheck
+- quickcheck-text
+- bytestring-arbitrary
+- ed25519
+- tagged
+- mtl
+
+library:
+  source-dirs: src
+#  ghc-options: -Wall
+  exposed-modules:
+  - PromissoryNote
+  - PromissoryNote.Note
+  - PromissoryNote.Note.Negotiate
+  - PromissoryNote.StoredNote
+  - PromissoryNote.Redeem
+  - PromissoryNote.Types
+  - PromissoryNote.Test
+  - PromissoryNote.Api
+
+  dependencies:
+  - servant
+  - servant-swagger
+
+#tests:
+#  test-bitcoin-payment-channel:
+#    main: PromissoryNote/Test/Main.hs
+#    source-dirs: src
+#    ghc-options:
+#    - -Wall
+#    - -main-is
+#    - PromissoryNote.Test.Main

@@ -1,11 +1,9 @@
 module PromissoryNote.Types
 (
-    module PromissoryNote.Types.UUID
-,   module PromissoryNote.Types.Crypto
-,   module PromissoryNote.Types.Misc
+    module X
 )
 where
 
-import PromissoryNote.Types.UUID
-import PromissoryNote.Types.Crypto
-import PromissoryNote.Types.Misc
+import PromissoryNote.Types.UUID    as X
+import PromissoryNote.Types.Crypto  as X
+import PromissoryNote.Types.Misc    as X

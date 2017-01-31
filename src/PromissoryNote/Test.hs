@@ -7,11 +7,12 @@ import           Data.Time.Calendar              (Day(..), fromGregorian)
 import           Data.Text.Arbitrary     ()
 import           Data.ByteString.Arbitrary (slowRandBs)
 import qualified Data.Serialize as Bin
+import qualified Data.List.NonEmpty     as NE
 
 
 arbNoteOfValue :: Amount -> UTCTime -> Gen PromissoryNote
 arbNoteOfValue a t = arbitrary >>=
-    \note@(PromissoryNote bn _) ->
+    \note@(PromissoryNoteG bn _) ->
         return $ note { base_note = bn { face_value = a, issue_date = t } }
 
 instance Arbitrary BaseNote where
@@ -26,7 +27,7 @@ instance Arbitrary BaseNote where
         arbAmount = fromIntegral <$> choose (1 :: Int, 100000 :: Int) :: Gen Amount
 
 instance Arbitrary PromissoryNote where
-    arbitrary = PromissoryNote <$> arbitrary <*> return []
+    arbitrary = PromissoryNoteG <$> arbitrary <*> pure (dummyNegRec NE.:| [])
 instance Arbitrary UTCTime where
     arbitrary =
         do randomDay <- choose (1, 29) :: Gen Int

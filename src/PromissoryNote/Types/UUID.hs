@@ -17,6 +17,7 @@ import           Data.Maybe (fromJust)
 import qualified Data.Serialize as Bin
 
 
+-- | Universally unique ID (SHA-256)
 data UUID = SHA256 BS.ByteString deriving Eq
 
 zeroUUID :: UUID
