@@ -13,6 +13,7 @@ default-extensions:
 - FlexibleInstances
 - RecordWildCards
 - MultiParamTypeClasses
+- OverloadedStrings
 
 dependencies:
 - base >=4.7 && <5
@@ -31,13 +32,14 @@ dependencies:
 - quickcheck-text
 - bytestring-arbitrary
 - ed25519
+- RSA
 - tagged
 - mtl
 - monad-time
 
 library:
   source-dirs: src
-  ghc-options: -Wall
+  ghc-options: -W
   exposed-modules:
   - PromissoryNote
   - PromissoryNote.Note
@@ -52,11 +54,15 @@ library:
   - servant
   - servant-swagger
 
-#tests:
-#  test-bitcoin-payment-channel:
-#    main: PromissoryNote/Test/Main.hs
-#    source-dirs: src
-#    ghc-options:
-#    - -Wall
-#    - -main-is
-#    - PromissoryNote.Test.Main
+tests:
+  test-promissory-note-types:
+    main:        Main.hs
+    source-dirs: test
+    ghc-options: -Wall
+    dependencies:
+    - promissory-note-types
+    - test-framework
+    - test-framework-quickcheck2
+    - tf-random
+    - random
+    - mtl

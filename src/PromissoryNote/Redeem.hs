@@ -1,7 +1,7 @@
 {-# LANGUAGE DeriveGeneric, DeriveAnyClass #-}
 module PromissoryNote.Redeem where
 
-import           PromissoryNote.Note
+import           PromissoryNote.Note.Util
 import           PromissoryNote.Types
 import           GHC.Generics
 import qualified Data.Serialize as Bin

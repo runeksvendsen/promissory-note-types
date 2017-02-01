@@ -8,7 +8,7 @@ module PromissoryNote.StoredNote
 where
 
 import PromissoryNote.Types
-import PromissoryNote.Note
+import PromissoryNote.Note.Util
 import qualified Data.Bitcoin.PaymentChannel as Pay
 
 import           GHC.Generics

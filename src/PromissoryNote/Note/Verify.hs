@@ -1,7 +1,8 @@
 module PromissoryNote.Note.Verify where
 
 import PromissoryNote.Types
-import PromissoryNote.Note
+import PromissoryNote.Note.Util
+
 
 import           Data.Maybe
 import qualified Data.List.NonEmpty     as NE
@@ -11,10 +12,17 @@ import qualified Data.Serialize         as Bin
 
 
 
-verifyLastRec :: PromissoryNote -> Bool
+verifyNote :: PromissoryNote -> Either VerifyError Bool
+verifyNote pn
+    | negRecLen pn == 1 = verifyLastRec pn
+    | otherwise = verifyLastRec pn >> verifyNote (removeLastRec pn)
+
+verifyLastRec :: PromissoryNote -> Either VerifyError Bool
 verifyLastRec pn@PromissoryNoteG{..} =
-    verify pk (Bin.encode noSigNote) (getSig . prev_bearer_sig $ NE.last negotiation_records)
+    verifySigG
+        (previousBearer pn)
+        (Message $ Bin.encode noSigNote)
+        (prev_bearer_sig $ NE.last negotiation_records)
   where
-    pk = error "STUB"
-    verify = Ed.dverify
     noSigNote = mapNoteSigs (const ()) pn
+

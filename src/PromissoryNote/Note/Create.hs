@@ -1,18 +1,19 @@
 {-# LANGUAGE ScopedTypeVariables, FlexibleContexts, GeneralizedNewtypeDeriving #-}
 module PromissoryNote.Note.Create
 ( createNote
+, createNoteT
 , NoteMonad(..)
 , NoteSign, runNoteSignM
 , NegotiationInfo(..)
--- , NoteConf(..)
+, NoteConf(..)
+, NoteSpec(..)
 -- *Util
 , mkNegRec
-, sign
+, edSign
 )
 where
 
 import PromissoryNote.Types
-import PromissoryNote.Note
 
 import Control.Monad.Time
 import Data.Time.Clock
@@ -23,59 +24,88 @@ import qualified Data.Serialize         as Bin
 
 
 
+
 class Monad m => NoteMonad m where
+    liftNote   :: NoteSign a -> m a
+    runNoteM   :: NoteConf -> m a -> a
     signGetPrv :: m Ed.SecretKey
+    confGet    :: m NoteConf
+    confPubKey :: m PubKeyG
 
-instance NoteMonad NoteSign where signGetPrv = R.asks ncPrvKey
+instance NoteMonad NoteSign where
+    runNoteM    = runNoteSignM
+    signGetPrv  = get ncPrvKey
+    confGet     = R.asks readerConf
+    confPubKey  = R.asks readerPubKey
+    liftNote ns = do
+        conf <- confGet
+        return $ runNoteSignM conf ns
 
-newtype NoteSign a = NoteSign (R.Reader NoteConf a)
-    deriving (Functor, Applicative, Monad, R.MonadReader NoteConf)
+data ReaderConf = ReaderConf { readerConf :: NoteConf, readerPubKey :: PubKeyG }
 
-runNoteSignM ::
-       Ed.SecretKey
-    -> Currency
-    -> StringIdentifier
-    -> DiffTime
-    -> NoteSign a
-    -> a
-runNoteSignM prvKey curr ident dur (NoteSign r) =
-    R.runReader r (NoteConf prvKey curr ident (calcPubId prvKey) dur)
-        where calcPubId = error "STUB"
+newtype NoteSign a = NoteSign (R.Reader ReaderConf a)
+    deriving (Functor, Applicative, Monad, R.MonadReader ReaderConf)
 
 data NoteConf = NoteConf
-    { ncPrvKey     :: Ed.SecretKey
-    , ncCurrency   :: Currency
-    , ncName       :: StringIdentifier
-    , ncIssuerId   :: UUID              -- ^ Derived from private key
-    , ncDuration   :: DiffTime
+    { ncPrvKey     :: Ed.SecretKey      -- ^ Note signer key
+    , ncCurrency   :: Currency          -- ^ Eg. BTC\/LTC\/ETH
+    , ncName       :: StringId          -- ^ Display name, eg. "https://superpay.com"
+    , ncDuration   :: NominalDiffTime   -- ^ Note duration
     }
+
+runNoteSignM ::
+       NoteConf
+    -> NoteSign a
+    -> a
+runNoteSignM conf (NoteSign r) =
+    R.runReader r $ ReaderConf conf (edPubKeyDerive $ ncPrvKey conf)
 
 
 data NegotiationInfo = NegotiationInfo
-    { niBearer  :: UUID
+    { niBearer  :: PubKeyG
     , niPayInfo :: UUID
     }
 
-mkBaseNote :: MonadTime m => UUID -> Amount -> m BaseNote
-mkBaseNote = undefined
+-- | Run-time information needed in order to construct a new note
+data NoteSpec = NoteSpec
+    { nsAmount      :: Amount           -- ^ Equal to value of payment
+    , nsVerifiers   :: [PubKeyG]        -- ^ Supplied by client
+    , nsNegInfo     :: NegotiationInfo  -- ^ Supplied by client
+    }
 
--- BaseNote
-{-  denomination        :: Currency         -- ^ Three-byte ASCII currency code (eg. BTC\/LTC\/ETH)
-  , face_value          :: Amount           -- ^ Little-endian uint64 (Bitcoin standard)
-  , issue_date          :: UTCTime          -- ^ Nanoseconds since epoch (big-endian uint64)
-  , exp_date            :: UTCTime          -- ^ Nanoseconds since epoch (big-endian uint64)
-  , issuer_name         :: StringIdentifier -- ^ Length-prefixed (uint8) UTF-8 string (max string byte size: 255 bytes)
-  , issuer              :: UUID             -- ^ Ed25519 public key hash (SHA-256)
-  , verifiers           :: UUID             -- ^ Root node hash in Merkle tree of verifier pubkey UUIDs
--}
+createNote :: (MonadTime m, NoteMonad m) =>
+       NoteSpec
+    -> m PromissoryNote
+createNote ns = do
+    now <- currentTime
+    liftNote $ createNoteT now ns
 
-createNote :: NoteMonad m =>
+createNoteT ::
+       UTCTime
+    -> NoteSpec
+    -> NoteSign PromissoryNote
+createNoteT now (NoteSpec val verifiers nri) = do
+    bn <- mkBaseNote now verifiers val
+    mkNote nri bn
+
+mkBaseNote :: UTCTime -> [PubKeyG] -> Amount -> NoteSign BaseNote
+mkBaseNote now verifiers value =
+    BaseNote
+        <$> get ncCurrency
+        <*> pure value
+        <*> pure (fromUTCTime now)
+        <*> fmap fromUTCTime (addUTCTime <$> get ncDuration <*> pure now)
+        <*> get ncName
+        <*> confPubKey
+        <*> pure verifiers
+
+mkNote ::
        NegotiationInfo
     -> BaseNote
-    -> m PromissoryNote
-createNote nri bn = do
+    -> NoteSign PromissoryNote
+mkNote nri bn = do
     prvKey <- signGetPrv
-    return $ PromissoryNoteG bn $ mkNegRec nri (sign prvKey noSigNote) NE.:| []
+    return $ PromissoryNoteG bn $ mkNegRec nri (edSign prvKey noSigNote) NE.:| []
   where
     noSigNote = PromissoryNoteG bn $ mkNegRec nri () NE.:| []
 
@@ -84,7 +114,9 @@ createNote nri bn = do
 mkNegRec :: NegotiationInfo -> a -> NegotiationRecG a
 mkNegRec NegotiationInfo{..} = NegRec niBearer niPayInfo
 
-sign :: forall a. Bin.Serialize a =>
-    Ed.SecretKey -> a -> SignatureG Ed.Signature
-sign k = MkSignatureG . Ed.dsign k . Bin.encode
+edSign :: forall a. Bin.Serialize a =>
+    Ed.SecretKey -> a -> SigData
+edSign k = SigEd25519 . Ed.dsign k . Bin.encode
 
+get :: NoteMonad m => (NoteConf -> a) -> m a
+get f = f <$> confGet

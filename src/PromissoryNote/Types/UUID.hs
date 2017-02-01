@@ -15,6 +15,8 @@ import           Data.String.Conversions (cs)
 import           Data.Hashable
 import           Data.Maybe (fromJust)
 import qualified Data.Serialize as Bin
+-- import           Test.QuickCheck
+-- import           Data.ByteString.Arbitrary (slowRandBs)
 
 
 -- | Universally unique ID (SHA-256)
@@ -45,3 +47,6 @@ instance Hashable UUID where
 instance Bin.Serialize UUID where
     put (SHA256 bs) = Bin.putByteString bs
     get = SHA256 <$> Bin.getByteString 32
+
+-- instance Arbitrary UUID where
+--     arbitrary = SHA256 <$> slowRandBs 32

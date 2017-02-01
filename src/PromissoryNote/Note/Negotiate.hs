@@ -6,7 +6,7 @@ module PromissoryNote.Note.Negotiate
 )
 where
 
-import PromissoryNote.Note
+import PromissoryNote.Note.Util
 import PromissoryNote.Note.Create
 import Data.Maybe
 import qualified Data.List.NonEmpty     as NE
@@ -18,7 +18,7 @@ negotiateTo :: NoteMonad m =>
     -> m PromissoryNote
 negotiateTo nri pn = do
     prvKey <- signGetPrv
-    return $ addRecord pn $ sign prvKey (addRecord noSigNote ())
+    return $ addRecord pn $ edSign prvKey (addRecord noSigNote ())
   where
     noSigNote = mapNoteSigs (const ()) pn
     replaceRecs pn' r = pn' { negotiation_records = r }
