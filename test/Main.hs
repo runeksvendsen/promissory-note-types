@@ -42,7 +42,7 @@ jsonSerDeser :: (Show a, Eq a, JSON.FromJSON a, JSON.ToJSON a) => a -> Bool
 jsonSerDeser fp =
     maybe False checkEquals decodedObj
         where decodedObj = JSON.decode $ JSON.encode fp
-              checkEquals serDeserVal = cs (JSON.encode fp) `trace`
+              checkEquals serDeserVal = -- cs (JSON.encode fp) `trace`
                 if serDeserVal /= fp then
                         error $ "Ser/deser mismatch.\nOriginal: " ++
                                 show fp ++ "\nCopy: " ++ show decodedObj

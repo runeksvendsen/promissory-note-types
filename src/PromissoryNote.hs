@@ -1,13 +1,8 @@
 module PromissoryNote
-(
-    module PromissoryNote.Note.Util
-,   module PromissoryNote.StoredNote
-,   module PromissoryNote.Redeem
-,   module PromissoryNote.Types.UUID
+( module X
 )
  where
 
-import PromissoryNote.Note.Util
-import PromissoryNote.StoredNote
-import PromissoryNote.Redeem
-import PromissoryNote.Types.UUID
+import PromissoryNote.Note          as X
+import PromissoryNote.StoredNote    as X
+import PromissoryNote.Redeem        as X
