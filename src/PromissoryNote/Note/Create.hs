@@ -1,4 +1,5 @@
 {-# LANGUAGE ScopedTypeVariables, FlexibleContexts, GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE DeriveGeneric #-}
 module PromissoryNote.Note.Create
 ( createNote
 , createNoteT
@@ -17,10 +18,13 @@ import PromissoryNote.Types
 
 import Control.Monad.Time
 import Data.Time.Clock
+import GHC.Generics
+import Data.Aeson
 import qualified Data.List.NonEmpty     as NE
 import qualified Crypto.Sign.Ed25519    as Ed
 import qualified Control.Monad.Reader   as R
 import qualified Data.Serialize         as Bin
+{-# ANN module ("HLint: ignore Use camelCase"::String) #-}
 
 
 
@@ -64,14 +68,15 @@ runNoteSignM conf (NoteSign r) =
 data NegotiationInfo = NegotiationInfo
     { niBearer  :: PubKeyG
     , niPayInfo :: UUID
-    }
+    } deriving (Eq, Show, Generic)
 
 -- | Run-time information needed in order to construct a new note
 data NoteSpec = NoteSpec
-    { nsAmount      :: Amount           -- ^ Equal to value of payment
-    , nsVerifiers   :: [PubKeyG]        -- ^ Supplied by client
-    , nsNegInfo     :: NegotiationInfo  -- ^ Supplied by client
-    }
+    { note_amount       :: Amount           -- ^ Equal to value of payment
+    , note_verifiers    :: [PubKeyG]        -- ^ Supplied by client
+    , note_neg_info     :: NegotiationInfo  -- ^ Supplied by client
+    } deriving (Eq, Show, Generic)
+
 
 createNote :: (MonadTime m, NoteMonad m) =>
        NoteSpec
@@ -120,3 +125,13 @@ edSign k = SigEd25519 . Ed.dsign k . Bin.encode
 
 get :: NoteMonad m => (NoteConf -> a) -> m a
 get f = f <$> confGet
+
+
+-- Generic instances
+instance ToJSON NegotiationInfo
+instance FromJSON NegotiationInfo
+instance Bin.Serialize NegotiationInfo
+
+instance ToJSON NoteSpec
+instance FromJSON NoteSpec
+instance Bin.Serialize NoteSpec
