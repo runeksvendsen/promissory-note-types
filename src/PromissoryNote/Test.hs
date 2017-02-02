@@ -70,10 +70,14 @@ instance MonadTime Gen where
 
 arbNoteOfValue :: Amount -> Gen PromissoryNote
 arbNoteOfValue val = do
+    now  <- arbitrary
+    arbNoteOfValueT now val
+
+arbNoteOfValueT :: UTCTime -> Amount -> Gen PromissoryNote
+arbNoteOfValueT now val = do
     vers    <- arbitrary
     WithSecret nri _ <- arbitrary
     conf <- arbitrary
-    now  <- arbitrary
     return $ runNoteM conf $ createNoteT now (NoteSpec val vers nri)
 
 

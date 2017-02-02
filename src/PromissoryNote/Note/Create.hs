@@ -66,8 +66,8 @@ runNoteSignM conf (NoteSign r) =
 
 
 data NegotiationInfo = NegotiationInfo
-    { niBearer  :: PubKeyG
-    , niPayInfo :: UUID
+    { neg_bearer  :: PubKeyG
+    , neg_pay_info :: UUID
     } deriving (Eq, Show, Generic)
 
 -- | Run-time information needed in order to construct a new note
@@ -117,7 +117,7 @@ mkNote nri bn = do
 
 -- Util
 mkNegRec :: NegotiationInfo -> a -> NegotiationRecG a
-mkNegRec NegotiationInfo{..} = NegRec niBearer niPayInfo
+mkNegRec NegotiationInfo{..} = NegRec neg_bearer neg_pay_info
 
 edSign :: forall a. Bin.Serialize a =>
     Ed.SecretKey -> a -> SigData
