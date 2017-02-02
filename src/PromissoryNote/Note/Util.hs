@@ -6,6 +6,7 @@ module PromissoryNote.Note.Util
 where
 
 import PromissoryNote.Types
+import PromissoryNote.Types.Misc
 
 import           GHC.Generics
 import           Control.Monad
@@ -42,7 +43,7 @@ dummyNote = PromissoryNoteG dummyBaseNote (dummyNegRec :| [])
 
 dummyNegRec = NegRec dummyEdPubKey zeroUUID dummyEdSig :: NegotiationRec
 
-dummyBaseNote = BaseNote BTC 0 epoch epoch "id" dummyEdPubKey [dummyEdPubKey]
+dummyBaseNote = BaseNote BTC 0 epoch epoch (StringId "dummy issuer") dummyEdPubKey [dummyEdPubKey]
     where epoch = fromUTCTime $ posixSecondsToUTCTime 0
 
 -- | Replace signature data

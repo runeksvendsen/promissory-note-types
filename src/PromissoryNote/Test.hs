@@ -37,6 +37,9 @@ instance Arbitrary ArbEdKeyPair where
         let Just (pk,sk) = Ed.createKeypairFromSeed_ bs
         return $ ArbEdKeyPair (sk, pk)
 
+instance Arbitrary StringId where
+    arbitrary = StringId <$> arbitrary
+
 instance Arbitrary NoteConf where
     arbitrary = do
         ArbEdKeyPair (sk, _) <- arbitrary

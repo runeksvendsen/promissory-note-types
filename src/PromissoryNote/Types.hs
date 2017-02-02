@@ -22,7 +22,6 @@ import qualified Network.Haskoin.Node   as HN
 {-# ANN module ("HLint: ignore Use camelCase"::String) #-}
 
 
-
 -- | Promissory note
 type PromissoryNote = PromissoryNoteG SigData
 data PromissoryNoteG sigType = PromissoryNoteG
