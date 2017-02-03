@@ -32,7 +32,7 @@ mkGenesisNote pn p = StoredNote pn zeroUUID p True
 -- | Create note for storage given previous note,
 -- also double check note/previous+current payment value
 mkCheckStoredNote :: PromissoryNote -> StoredNote -> Pay.SignedPayment -> Either String StoredNote
-mkCheckStoredNote newPN prevSN@(StoredNote storedPN storedID storedPmnt _) newPmnt =
+mkCheckStoredNote newPN prevSN@(StoredNote _ _ storedPmnt _) newPmnt =
     checkPaymentValue >>=
         \pn -> Right $ StoredNote pn (getUUID prevSN) newPmnt True
   where

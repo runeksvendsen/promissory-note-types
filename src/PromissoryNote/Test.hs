@@ -78,7 +78,7 @@ arbNoteOfValueT now val = do
     vers    <- arbitrary
     WithSecret nri _ <- arbitrary
     conf <- arbitrary
-    return $ runNoteM conf $ createNoteT now (NoteSpec val vers nri)
+    return $ runSign conf $ createNoteT now (NoteSpec val vers nri)
 
 
 instance Arbitrary Amount where

@@ -3,8 +3,8 @@
 module PromissoryNote.Note.Create
 ( createNote
 , createNoteT
-, NoteMonad(..)
-, NoteSign, runNoteSignM
+, NoteSign(..), signGetPrv
+-- , NoteSignM, runNoteSignM
 , NegotiationInfo(..)
 , NoteConf(..)
 , NoteSpec(..)
@@ -28,26 +28,26 @@ import qualified Data.Serialize         as Bin
 
 
 
-
-class Monad m => NoteMonad m where
-    liftNote   :: NoteSign a -> m a
-    runNoteM   :: NoteConf -> m a -> a
-    signGetPrv :: m Ed.SecretKey
+class Monad m => NoteSign m where
+    liftNote   :: NoteSignM a -> m a
+    runSign    :: (NoteConf -> m a -> a)
     confGet    :: m NoteConf
     confPubKey :: m PubKeyG
 
-instance NoteMonad NoteSign where
-    runNoteM    = runNoteSignM
-    signGetPrv  = get ncPrvKey
+signGetPrv :: NoteSign m => m Ed.SecretKey
+signGetPrv = get ncPrvKey
+
+
+instance NoteSign NoteSignM where
     confGet     = R.asks readerConf
     confPubKey  = R.asks readerPubKey
-    liftNote ns = do
-        conf <- confGet
-        return $ runNoteSignM conf ns
+    liftNote    = id
+    runSign     = runNoteSignM
+
 
 data ReaderConf = ReaderConf { readerConf :: NoteConf, readerPubKey :: PubKeyG }
 
-newtype NoteSign a = NoteSign (R.Reader ReaderConf a)
+newtype NoteSignM a = NoteSignM (R.Reader ReaderConf a)
     deriving (Functor, Applicative, Monad, R.MonadReader ReaderConf)
 
 data NoteConf = NoteConf
@@ -59,14 +59,14 @@ data NoteConf = NoteConf
 
 runNoteSignM ::
        NoteConf
-    -> NoteSign a
+    -> NoteSignM a
     -> a
-runNoteSignM conf (NoteSign r) =
+runNoteSignM conf (NoteSignM r) =
     R.runReader r $ ReaderConf conf (edPubKeyDerive $ ncPrvKey conf)
 
 
 data NegotiationInfo = NegotiationInfo
-    { neg_bearer  :: PubKeyG
+    { neg_bearer   :: PubKeyG
     , neg_pay_info :: UUID
     } deriving (Eq, Show, Generic)
 
@@ -78,7 +78,7 @@ data NoteSpec = NoteSpec
     } deriving (Eq, Show, Generic)
 
 
-createNote :: (MonadTime m, NoteMonad m) =>
+createNote :: (MonadTime m, NoteSign m) =>
        NoteSpec
     -> m PromissoryNote
 createNote ns = do
@@ -88,12 +88,12 @@ createNote ns = do
 createNoteT ::
        UTCTime
     -> NoteSpec
-    -> NoteSign PromissoryNote
+    -> NoteSignM PromissoryNote
 createNoteT now (NoteSpec val verifiers nri) = do
     bn <- mkBaseNote now verifiers val
     mkNote nri bn
 
-mkBaseNote :: UTCTime -> [PubKeyG] -> Amount -> NoteSign BaseNote
+mkBaseNote :: UTCTime -> [PubKeyG] -> Amount -> NoteSignM BaseNote
 mkBaseNote now verifiers value =
     BaseNote
         <$> get ncCurrency
@@ -107,7 +107,7 @@ mkBaseNote now verifiers value =
 mkNote ::
        NegotiationInfo
     -> BaseNote
-    -> NoteSign PromissoryNote
+    -> NoteSignM PromissoryNote
 mkNote nri bn = do
     prvKey <- signGetPrv
     return $ PromissoryNoteG bn $ mkNegRec nri (edSign prvKey noSigNote) NE.:| []
@@ -123,7 +123,7 @@ edSign :: forall a. Bin.Serialize a =>
     Ed.SecretKey -> a -> SigData
 edSign k = SigEd25519 . Ed.dsign k . Bin.encode
 
-get :: NoteMonad m => (NoteConf -> a) -> m a
+get :: NoteSign m => (NoteConf -> a) -> m a
 get f = f <$> confGet
 
 

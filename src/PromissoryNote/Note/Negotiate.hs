@@ -1,7 +1,7 @@
 {-# LANGUAGE ScopedTypeVariables, FlexibleContexts #-}
 module PromissoryNote.Note.Negotiate
 ( negotiateTo
-, NoteMonad
+, NoteSign
 , NegotiationInfo(..)
 )
 where
@@ -12,7 +12,7 @@ import Data.Maybe
 import qualified Data.List.NonEmpty     as NE
 
 
-negotiateTo :: NoteMonad m =>
+negotiateTo :: NoteSign m =>
        NegotiationInfo
     -> PromissoryNote
     -> m PromissoryNote
